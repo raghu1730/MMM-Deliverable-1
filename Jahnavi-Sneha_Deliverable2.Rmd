@@ -1,0 +1,68 @@
+---
+title: "Deliverable2"
+output: word_document
+date: '2022-07-15'
+---
+
+
+##### Reading data set in R
+
+```{r}
+AMZN<-read.csv("AMZN_Apple.csv")
+#Checking the column names and dimention of the data
+colnames(AMZN)
+dim(AMZN)
+```
+The package used to read csv file is "readr". With readr 2.0, default "slow" reading was introduced. Lazy reading refers to the practice of reading CSV files only when needed, as opposed to reading them all at once.
+
+Lazy reading has a number of drawbacks, one of which is the requirement for the program to maintain an open file handle. The low level method for computer programs to read from or write to a file is through file handles. The operating system affects how they operate.
+
+##### Joining data sets
+
+```{r}
+# Joining data sets. 
+# In our case we have only one data set. However, we can join data sets using
+#joined_datasets<-merge(data1,data2,all=TRUE)
+```
+The package used is "dplyr". Its major strenght is it provides clear naming conventions and prohibits combining identifiers from various data classes (this can cause issues with MRNs)
+
+However,it does not permit combining if one of your source datasets contains numerous columns with the same name.
+
+##### Deleting ,adding and renaming columns
+
+```{r}
+#Deleteing X column
+AMZN$X<-NULL
+colnames(AMZN)
+#Renaming columns
+names(AMZN)[2]<-"price_per_unit"
+names(AMZN)[7]<-"units_sold"
+names(AMZN)[8]<-"Day"
+names(AMZN)[9]<-"advert_tool"
+colnames(AMZN)
+#Removing other columns
+AMZN$High<-NULL
+AMZN$Low<-NULL
+AMZN$Close<-NULL
+AMZN$Adj.Close<-NULL
+AMZN$sales<-AMZN$price_per_unit*AMZN$units_sold
+head(AMZN)
+tail(AMZN)
+```
+Base functions were used in deleting and renaming columns. One does not need to install any package or demand it everytime. However, base functions are limited to simple commnads.
+
+##### Missing value handling
+
+```{r}
+# Missing value handling
+AMZN[is.na(AMZN)] <- 0 # Replacing missing values with zero
+#Aggregate-we aggregate by days of the week
+AMZN_A<-aggregate(. ~ Day, data = AMZN[,c(2,3,4,6)], 
+          FUN = sum,na.rm=TRUE)
+AMZN_A
+
+```
+
+The missing values were handled by replacing them with zero. Dplyr package was used . The advantages of doing this include the ability to handle the data natively in a relational database, the ability to run queries on that database, and the ability to only return the results of the query.
+
+
