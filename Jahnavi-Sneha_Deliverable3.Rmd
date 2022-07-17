@@ -1,0 +1,133 @@
+---
+title: "Deliverable3"
+output: word_document
+date: '2022-07-15'
+---
+
+### Deliverable 2
+
+##### Reading data set in R
+
+```{r}
+AMZN<-read.csv("AMZN_Apple.csv")
+#Checking the column names and dimention of the data
+colnames(AMZN)
+dim(AMZN)
+```
+##### Joining data sets
+
+```{r}
+# Joining data sets. 
+# In our case we have only one data set. However, we can join data sets using
+#joined_datasets<-merge(data1,data2,all=TRUE)
+```
+##### Deleting ,adding and renaming columns
+
+```{r}
+#Deleteing X column
+AMZN$X<-NULL
+colnames(AMZN)
+#Renaming columns
+names(AMZN)[2]<-"price_per_unit"
+names(AMZN)[7]<-"units_sold"
+names(AMZN)[8]<-"Day"
+names(AMZN)[9]<-"advert_tool"
+colnames(AMZN)
+#Removing other columns
+AMZN$High<-NULL
+AMZN$Low<-NULL
+AMZN$Close<-NULL
+AMZN$Adj.Close<-NULL
+AMZN$sales<-AMZN$price_per_unit*AMZN$units_sold
+head(AMZN)
+tail(AMZN)
+```
+##### Missing value handling
+
+```{r}
+# Missing value handling
+AMZN[is.na(AMZN)] <- 0 # Replacing missing values with zero
+#Aggregate-we aggregate by days of the week
+AMZN_A<-aggregate(. ~ Day, data = AMZN[,c(2,3,4,6)], 
+          FUN = sum,na.rm=TRUE)
+AMZN_A
+
+```
+
+##### 1. How is sales related to week numbers?-Which day of the week has highest sales.
+
+```{r}
+
+AMZN_A$Day[AMZN_A$sales==max(AMZN_A$sales)]
+max(AMZN_A$sales)
+
+```
+
+Friday is the day when the highest sales were made with 2.321576e+12 units.
+
+```{r}
+library(ggplot2)
+# Change the width of bars
+ggplot(data=AMZN_A, aes(x=Day, y=sales)) +
+  geom_bar(stat="identity", width=0.5)
+# Change colors
+ggplot(data=AMZN_A, aes(x=Day, y=sales)) +
+  geom_bar(stat="identity", color="blue", fill="white")
+# Minimal theme + blue fill color
+p<-ggplot(data=AMZN_A, aes(x=Day, y=sales)) +
+  geom_bar(stat="identity", fill="steelblue")+
+  theme_minimal()
+p
+
+t<-ggplot(AMZN_A, aes(x=Day, y=sales, fill=Day)) +
+  geom_bar(stat="identity")+theme_minimal()
+t
+
+```
+
+
+##### 2. How does TV spending(investment) affect sales? Can you quantify it? 
+
+```{r}
+Mod1<-lm(sales~advert_tool,data=AMZN)
+summary(Mod1)
+1.756e+09+1.368e+08*100
+
+```
+
+From the results above, the everage sales increase by 1.368e+08 units when one advert is made using TV. This means that if 100 adverts were made, the company would expect 1.5436e+10 sales.
+
+
+##### 3. How does Radio spending(investment) affect sales? Can you quantify it? 
+
+```{r}
+Mod1<-lm(sales~advert_tool,data=AMZN)
+summary(Mod1)
+```
+
+From the results above, the everage sales increase by 1.368e+08 lessr units when one advert is made using Radio. This means that if 100 adverts were made, the company would expect 1.5436e+10 sales.
+
+```{r}
+p<-ggplot(AMZN, aes(x=advert_tool, y=sales, fill=advert_tool)) +
+  geom_bar(stat="identity")+theme_minimal()
+p
+
+```
+
+
+##### 4. Calculate the ROI for each investment
+
+```{r}
+AMZN_R<-aggregate(. ~ advert_tool, data = AMZN[,c(2,3,5,6)], 
+                  FUN = sum,na.rm=TRUE)
+AMZN_R
+ROI_TV<-( 5.193822e+12+5.477374e+12)/5.477374e+12
+ROI_TV
+
+ROI_RADIO<-( 5.193822e+12+5.477374e+12)/5.193822e+12
+ROI_RADIO
+
+```
+
+
+Return on investment (ROI) is calculated by dividing the profit earned on an investment by the cost of that investment.
